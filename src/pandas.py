@@ -8,3 +8,8 @@ class PandasHelper:
         pd.set_option('display.max_columns', None)
         pd.set_option('display.width', 1500)
         pd.set_option('display.float_format', '{:.2f}'.format)
+
+
+    @staticmethod
+    def read_bulk_files():
+        
