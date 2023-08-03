@@ -1,0 +1,21 @@
+[package]
+name = "rs_helper"
+version = "0.1.0"
+edition = "2021"
+
+[build-system]
+requires = ["maturin"]
+build-backend = "maturin"
+
+[lib]
+name = "rs_helper" 
+path = "src/lib.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+polars = { version = "0.31.1", features = ["parquet", "json"] }
+polars-core = "0.31.1"
+pyo3 = { version = "0.15", features = ["extension-module"] }
+rayon = "1.5"
+arrow = "45.0.0"
