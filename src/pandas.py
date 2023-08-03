@@ -12,4 +12,4 @@ class PandasHelper:
 
     @staticmethod
     def read_bulk_files():
-        
+       ... 
