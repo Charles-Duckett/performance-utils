@@ -6,8 +6,10 @@ filenames = [os.path.join(os.path.dirname(__file__), filename) for filename in [
 filenames_dict = dict()
 for filename in filenames: filenames_dict[filename] = 'csv'
 
-rs_helper.read_data_from_sources(filenames_dict)
-# df_dict = rs_helper.read_data_from_sources(filenames_dict)
+# rs_helper.read_data_from_sources(filenames_dict)
+df_dict = rs_helper.read_data_from_sources(filenames_dict)
+print('result:')
+print(df_dict)
 
 """
 result:

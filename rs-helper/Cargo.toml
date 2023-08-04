@@ -16,6 +16,9 @@ path = "src/lib.rs"
 [dependencies]
 polars = { version = "0.31.1", features = ["parquet", "json"] }
 polars-core = "0.31.1"
-pyo3 = { version = "0.15", features = ["extension-module"] }
+pyo3 = { version = "0.19", features = ["extension-module"] }
 rayon = "1.5"
 arrow = "45.0.0"
+csv = "1.2"
+pyo3-polars = "0.5.0"
+

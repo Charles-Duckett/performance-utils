@@ -3,15 +3,27 @@ use pyo3::types::PyDict;
 use pyo3::wrap_pyfunction;
 use std::collections::HashMap;
 use polars::prelude::*;
-// use polars_core::prelude::*;
-// use polars_io::prelude::*;
+// use polars::dataframe::PyDataFrame;
+// use arrow::csv::ReaderBuilder;
+// use csv::ReaderBuilder;
+use csv::ReaderBuilder;
+use arrow::error::ArrowError;
+use std::fs::File;
 use rayon::prelude::*;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
+use std::io::BufReader;
+use std::io::Read;
+use pyo3_polars::{
+    PyDataFrame,
+    PyLazyFrame,
+};
+use pyo3_polars::error::PyPolarsErr;
 
 // TODO: Add support for file formats
 
 fn parallel_dataframe_read(dictionary: HashMap<&str, &str>) {
+// fn parallel_dataframe_read(dictionary: HashMap<&str, &str>) -> PyResult<Py<PyDict>> {
     // read the data from the sources in parallel
     // return a hashmap of dataframes with their names
     let dataframes: Arc<Mutex<HashMap<&str, PolarsResult<DataFrame>>>> = Arc::new(Mutex::new(HashMap::new()));
@@ -33,13 +45,34 @@ fn parallel_dataframe_read(dictionary: HashMap<&str, &str>) {
                 println!("Unsupported file format");
                 // (source, Err(PolarsError::Other("Unsupported file format")))
             }
-         }
+        }
     });
 
-    println!("Hello from parallel_dataframe_read");
-    println!("{:?}", dataframes);
+    // println!("{:?}", dataframes);
+    // Ok(py_dict.into())
+}
 
-    // use rayon to iterate over the hashmap in parallel and insert the dataframes and the names of the dataframes into the hashmap
+fn parallel_arrow_read(dictionary: HashMap<&str, &str>) {
+    // let input_file = File::open("my_data.csv")?;
+    // let csv_reader = ReaderBuilder::new().build(input_file)?;
+
+    // dictionary
+    //     .par_iter()
+    //     .for_each(|(source, format)| {
+    //         println!("{}, {}", source, format);
+    //         match *format {
+    //             "csv" => {
+    //                 // let path = Path::new(*source);
+    //                 let input_file = File::open(*source);
+    //                 // let csv_reader = ReaderBuilder::new().build(input_file).expect("Failed to create CsvReader");
+    //                 let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(input_file);
+    //             },
+    //             _ => {
+    //                 println!("Unsupported file format");
+    //                 // (source, Err(PolarsError::Other("Unsupported file format")))
+    //             }
+    //         }
+    //     });
 }
 
 
