@@ -14,7 +14,7 @@ use std::sync::{Arc, Mutex};
 // remove lifetime specifier to make it work without returing hashmap
 
 
-fn parallel_dataframe_read<'a>(dictionary: HashMap<&str, &str>) {
+fn parallel_dataframe_read(dictionary: HashMap<&str, &str>) {
     // fn parallel_dataframe_read(dictionary: HashMap<&str, &str>) -> PyResult<Py<PyDict>> {
     // read the data from the sources in parallel
     // return a hashmap of dataframes with their names
