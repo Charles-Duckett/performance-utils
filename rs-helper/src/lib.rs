@@ -10,6 +10,7 @@ use std::sync::{Arc, Mutex};
 use polars::prelude::DataFrame;
 
 // TODO: Add support for file formats
+// TODO: bulk read/write to cloud to escape GIL
 #[derive(Debug, Clone)]
 struct DataFrames<'a> {
     dataframes: HashMap<&'a str, DataFrame>,
@@ -24,7 +25,7 @@ impl<'a> DataFrames<'a> {
     }
 
     // Add a method to insert dataframes into the HashMap
-    fn insert(&mut self, key: &'a str, dataframe: DataFrame) {
+    fn insert(&mut self, key: &'a str, dataframe: DataFrame) {   
         self.dataframes.insert(key, dataframe);
     }
 
@@ -43,6 +44,7 @@ impl<'a> DataFrames<'a> {
 fn parallel_dataframe_read<'a>(dictionary: HashMap<&'a str, &str>) -> Arc<Mutex<DataFrames<'a>>> {
 
     let dataframes: Arc<Mutex<DataFrames<'_>>> = Arc::new(Mutex::new(DataFrames::new()));
+    println!("Starting parallel read");
     dictionary.par_iter().for_each(|(source, format)| {
         match *format {
             "csv" => {
@@ -71,11 +73,20 @@ fn parallel_dataframe_read<'a>(dictionary: HashMap<&'a str, &str>) -> Arc<Mutex<
 
 #[pyfunction]
 fn read_data_from_sources(_py: Python<'_>, sources: &PyDict) -> PyResult<PyObject> {
-    
+
+    println!("Starting Rust");
     let sources_hmap: HashMap<&str, &str> = sources.extract().unwrap();
+
+    println!("Starting parallel read");
     let dataframes_hmap: Arc<Mutex<DataFrames<'_>>> = _py.allow_threads(move || parallel_dataframe_read(sources_hmap));
+
+    println!("Locking dataframes");
     let locked_dataframes: DataFrames<'_> = dataframes_hmap.lock().unwrap().clone();
+
+    println!("Converting to Py");
     let pyobject: Py<PyAny> = locked_dataframes.into_py(_py);
+
+    println!("Returning from Rust");
 
     Ok(pyobject)
 

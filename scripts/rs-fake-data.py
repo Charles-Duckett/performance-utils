@@ -7,6 +7,7 @@ import numpy as np
 import os
 import glob
 from faker import Faker
+from tqdm import tqdm
 
 # Set a seed for reproducibility (optional)
 np.random.seed(42)
@@ -28,7 +29,7 @@ def create_fake_data(num_rows=1_000):
     df = pd.DataFrame(data)
 
     # Print the DataFrame
-    print(df.head())
+    # print(df.head())
 
     # Return the DataFrame
     return df
@@ -46,7 +47,7 @@ def write_fake_data_static_three():
 # write N number of fake data files with M number of rows
 def write_fake_data(N=None, M=None):
     if N is None: return
-    for i in range(N):
+    for i in tqdm(range(N)):
         df = create_fake_data(M)
         df.to_csv(os.path.join(os.path.dirname(__file__), 'fake-data', f'fake_data-{i}.csv'), index=False)
 
@@ -57,6 +58,6 @@ if not os.path.isdir(os.path.join(os.path.dirname(__file__), 'fake-data')): os.m
 for filename in glob.glob(os.path.join(os.path.dirname(__file__), 'fake-data', '*.csv')): os.remove(filename)
 
 # write_fake_data_static_three()
-write_fake_data(N=100, M=100)
+write_fake_data(N=1000, M=10)
 
 if __name__ == "__main__": pass
