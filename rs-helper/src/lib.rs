@@ -10,17 +10,6 @@ use std::sync::{Arc, Mutex};
 use polars::prelude::DataFrame;
 
 // TODO: Add support for file formats
-
-// impl Clone for DataFrame {
-//     fn clone(&self) -> Self {
-//         // Perform a deep copy of the struct's fields
-//         let df = self.clone();
-//     }
-// }
-
-
-// Define a new struct that holds the HashMap with a lifetime parameter
-// #[derive(Debug, Clone, Copy)]
 #[derive(Debug, Clone)]
 struct DataFrames<'a> {
     dataframes: HashMap<&'a str, DataFrame>,
@@ -84,37 +73,12 @@ fn parallel_dataframe_read<'a>(dictionary: HashMap<&'a str, &str>) -> Arc<Mutex<
 
 
 #[pyfunction]
-// fn read_data_from_sources(_py: Python<'_>, sources: &PyDict) -> PyResult<()> {
 fn read_data_from_sources(_py: Python<'_>, sources: &PyDict) -> PyResult<PyObject> {
-// fn read_data_from_sources(_py: Python<'_>, sources: &PyDict) {
-    // println!("{:?}", sources);
-
-    // move the data from the python dict to a rust hashmap
+    
     let sources_hmap: HashMap<&str, &str> = sources.extract().unwrap();
-    // println!("{:?}", sources_hmap);
-
     let dataframes_hmap: Arc<Mutex<DataFrames<'_>>> = _py.allow_threads(move || parallel_dataframe_read(sources_hmap));
-
-    // println!("{:?}", dataframes_hmap);
-
-    // get the dataframes object
-    // Clone the Arc to get a new reference
-    // let dataframes_clone: Arc<Mutex<DataFrames<'_>>> = dataframes_hmap.clone();
-
-    // Lock the Mutex to obtain the MutexGuard
-    // let guard: std::sync::MutexGuard<'_, DataFrames<'_>> = dataframes_clone.lock().unwrap();
-    // let dataframes: &DataFrames<'_> = &*guard;
-
-    // clone the guard to get a new reference
-    // let dataframes: DataFrames<'_> = dataframes.clone();
-
-    let locked_dataframes = dataframes_hmap.lock().unwrap();
-    let free_mutex_dfs = locked_dataframes.clone();
-    // let unlocked_dataframes = &locked_dataframes;
-    // let value = locked_dataframes.downcast();
-    // let dataframes: DataFrames<'_> = *dataframes_hmap;
-
-    // let pyobject: Py<PyAny> = dataframes.into_py(_py);
+    let locked_dataframes: std::sync::MutexGuard<'_, DataFrames<'_>> = dataframes_hmap.lock().unwrap();
+    let free_mutex_dfs: DataFrames<'_> = locked_dataframes.clone();
     let pyobject: Py<PyAny> = free_mutex_dfs.into_py(_py);
 
     Ok(pyobject)
