@@ -31,6 +31,7 @@ impl<'a> DataFrames<'a> {
     fn into_py(self, py: Python<'_>) -> PyObject {
         let dataframes: HashMap<&str, DataFrame> = self.dataframes;
         let py_dict: &PyDict = PyDict::new(py);
+        // TODO: support asynchronous an then locking the py_dict when we need to set_item
         for (key, dataframe) in dataframes {
             let py_dataframe = PyDataFrame(dataframe);
             py_dict.set_item(key, py_dataframe.into_py(py)).unwrap();
@@ -42,7 +43,6 @@ impl<'a> DataFrames<'a> {
 fn parallel_dataframe_read<'a>(dictionary: HashMap<&'a str, &str>) -> Arc<Mutex<DataFrames<'a>>> {
 
     let dataframes: Arc<Mutex<DataFrames<'_>>> = Arc::new(Mutex::new(DataFrames::new()));
-
     dictionary.par_iter().for_each(|(source, format)| {
         match *format {
             "csv" => {
@@ -74,9 +74,8 @@ fn read_data_from_sources(_py: Python<'_>, sources: &PyDict) -> PyResult<PyObjec
     
     let sources_hmap: HashMap<&str, &str> = sources.extract().unwrap();
     let dataframes_hmap: Arc<Mutex<DataFrames<'_>>> = _py.allow_threads(move || parallel_dataframe_read(sources_hmap));
-    let locked_dataframes: std::sync::MutexGuard<'_, DataFrames<'_>> = dataframes_hmap.lock().unwrap();
-    let free_mutex_dfs: DataFrames<'_> = locked_dataframes.clone();
-    let pyobject: Py<PyAny> = free_mutex_dfs.into_py(_py);
+    let locked_dataframes: DataFrames<'_> = dataframes_hmap.lock().unwrap().clone();
+    let pyobject: Py<PyAny> = locked_dataframes.into_py(_py);
 
     Ok(pyobject)
 
@@ -84,6 +83,8 @@ fn read_data_from_sources(_py: Python<'_>, sources: &PyDict) -> PyResult<PyObjec
 
 #[pymodule]
 fn rs_helper(_py: Python, m: &PyModule) -> PyResult<()> {
+
     m.add_function(wrap_pyfunction!(read_data_from_sources, m)?)?;
     Ok(())
+
 }
