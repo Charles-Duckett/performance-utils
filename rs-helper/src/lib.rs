@@ -41,7 +41,6 @@ impl<'a> DataFrames<'a> {
 
 fn parallel_dataframe_read<'a>(dictionary: HashMap<&'a str, &str>) -> Arc<Mutex<DataFrames<'a>>> {
 
-    // let dataframes: Arc<Mutex<HashMap<& str, PolarsResult<DataFrame>>>> = Arc::new(Mutex::new(HashMap::new()));
     let dataframes: Arc<Mutex<DataFrames<'_>>> = Arc::new(Mutex::new(DataFrames::new()));
 
     dictionary.par_iter().for_each(|(source, format)| {
@@ -55,11 +54,9 @@ fn parallel_dataframe_read<'a>(dictionary: HashMap<&'a str, &str>) -> Arc<Mutex<
                         dataframes.lock().unwrap().insert(source, df);
                     }
                     Err(err) => {
-                        // Handle error cases here, e.g., print or log the error.
                         println!("Error reading {}: {:?}", source, err);
                     }
                 }
-                // dataframes.lock().unwrap().insert(source, df);
             }
             _ => {
                 println!("Unsupported file format");
